@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nc.dao.OrderDetailMapper">
+	<!-- 开启第三方缓存 -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache> -->
+		<!-- 使用redis缓存 -->
+	<cache type="org.mybatis.caches.redis.RedisCache"></cache>
+	<resultMap type="orderDetail" id="orderDetailMap">
+		<id property="id" column="id" />
+		<result property="orderID" column="orderID" />
+		<result property="quantity" column="quantity" />
+		<result property="discount" column="discount" />
+		<association property="pd" javaType="products">
+			<id property="productID" column="productID" />
+			<result property="product_name" column="product_name" />
+		</association>
+		<association property="cg" javaType="categorys">
+			<id property="categoryID" column="categoryID" />
+			<result property="category_name" column="category_name" />
+		</association>
+		<association property="pv" javaType="providers">
+			<id property="providerID" column="providerID" />
+			<result property="provider_name" column="provider_name" />
+		</association>
+
+	</resultMap>
+
+
+	<select id="queryDetailByOrderID" resultMap="orderDetailMap"
+		flushCache="false">
+		select od.*,p.product_name , c.categoryID,c.category_name ,pv.providerID,
+		pv.provider_name
+		from order_detail od , orders o , products p ,
+		categorys c , providers pv
+		where od.orderID = o.orderID
+		and od.productID = p.productID
+		and p.categoryID = c.categoryID
+		and p.providerID = pv.providerID
+		and od.orderID = #{orderID}
+		order by id
+	</select>
+
+	<insert id="addOrderDetail">
+		insert into order_detail (orderID,productID,quantity,discount)
+		values(#{orderID},#{pd.productID},#{quantity},#{discount})
+	</insert>
+	<update id="updateOrderDetail">
+		update order_detail
+		<set>
+			<if test="quantity != 0">quantity = #{quantity},</if>
+			<if test="discount != 0">discount = #{discount}</if>
+		</set>
+		where id = #{id}
+	</update>
+	<delete id="delOrderDetail">
+		delete from order_detail where id = #{id}
+	</delete>
+
+
+</mapper>

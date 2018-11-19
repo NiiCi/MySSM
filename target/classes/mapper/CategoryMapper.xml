@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nc.dao.CategoryMapper">
+  <!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache> -->
+  	<!-- 使用redis缓存 -->
+  <cache type="org.mybatis.caches.redis.RedisCache"></cache>
+  <!-- 获取总页数 -->
+  <select id="getCount" resultType="int">
+  	select count(*) from categorys 
+  </select>
+  <!-- 分页查询 -->
+  <select id="queryAll" resultType="categorys" flushCache="false">
+  	select * from categorys order by categoryID
+  </select>
+  <!-- 获取类别下拉列表 -->
+  <select id="queryCates" resultType="categorys" >
+  	select * from categorys order by categoryID 
+  </select>
+  <!-- 添加类别 -->
+  <insert id="addCategory">
+  	insert into categorys (category_name,category_desc) values (#{category_name},#{category_desc})
+  </insert>
+  <!-- 修改类别 -->
+  <update id="updateCategory">
+  	update categorys
+  	<set>
+  		<if test="category_name != null">category_name = #{category_name},</if>
+  		<if test="category_desc != null">category_desc = #{category_desc},</if>
+  	</set>
+  	where categoryID = #{categoryID}
+  </update>
+  <!-- 删除类别 -->		
+  <delete id="deleteCategory" >
+  	delete from categorys where categoryID = #{categoryID} 
+  	and categoryID not in (select categoryID from products)
+  </delete>
+  <!-- 判断类别名是否存在 -->
+  <select id="queryByName" resultType="categorys">
+  	select * from categorys where category_name = #{cate_name}
+  </select>
+</mapper>

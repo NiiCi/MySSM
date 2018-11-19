@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nc.dao.OrderMapper">  
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache> -->
+	<!-- 使用redis缓存 -->
+	<cache type="org.mybatis.caches.redis.RedisCache"></cache>
+	<resultMap type="orders" id="ordersMap">
+		<id property="orderID" column="orderID"/>
+		<result property="order_date" column="order_date"/>
+		<association property="cus" javaType="customers">
+			<id property="customerID" column="customerID"/>
+			<result property="customer_name" column="customer_name"/>
+		</association>
+		<association property="emp" javaType="employees">
+			<id property="empID" column="empID"/>
+			<result property="emp_name" column="emp_name"/>
+		</association>
+	</resultMap>
+	
+	<select id="queryAll" resultMap="ordersMap" flushCache="false">
+		select o.*,c.customer_name,e.emp_name from orders o,customers c,employees e
+		where o.customerID = c.customerID and o.empID = e.empID
+		<if test="order_date != null"> and order_date like #{order_date}</if>
+		<if test="cus.customerID != 0">and o.customerID = #{cus.customerID}</if>
+		<if test="emp.empID != 0">and o.empID = #{emp.empID}</if>
+		order by o.orderID
+	</select>
+	<update id="updateOrder">
+		update orders 
+			<set>
+				<if test="order_date != null">order_date=#{order_date},</if>
+				<if test="cus.customerID != 0">customerID=#{cus.customerID},</if>
+				<if test="emp.empID != 0">empID=#{emp.empID}</if>
+			</set>
+		where orderID = #{orderID}
+	</update>
+	<insert id="addOrder">
+		insert into orders (order_date,customerID,empID)
+		values(#{order_date},#{cus.customerID},#{emp.empID})
+	</insert>
+	<delete id="deleteOrder">
+		delete from orders where orderID = #{orderID}
+	</delete>
+</mapper>

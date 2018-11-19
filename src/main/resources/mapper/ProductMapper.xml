@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nc.dao.ProductMapper">
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache> -->
+	<!-- 使用redis缓存 -->
+	<cache type="org.mybatis.caches.redis.RedisCache"></cache>
+<!-- <cache eviction="LRU" flushInterval="100000" size="512" readOnly="true"></cache> -->
+	<resultMap type="products" id="queryAllMap">
+	  	<id property="productID" column="productID"/>
+	  	<result property="product_name" column="product_name"/>
+	  	<result property="income_price" column="income_price"/>
+	  	<result property="quantity" column="quantity"/>
+	  	<result property="sales_price" column="sales_price"/>
+	  	<result property="income_time" column="income_time"/>
+	  	<association property="pv" javaType="providers">
+	  		<id property="providerID" column="providerID"/>
+	  		<result property="provider_name" column="provider_name"/>
+	  	</association>
+	  	<association property="cg" javaType="categorys">
+	  		<id property="categoryID" column="categoryID"/>
+	  		<result property="category_name" column="category_name"/>
+	  	</association>
+	</resultMap>
+   <!-- 获取总页数 -->
+ <!--  <select id="getCount" resultType="int">
+  	select count(*) from products 
+  </select> -->
+  <!-- 分页查询 -->
+  <select id="queryAll" resultMap="queryAllMap" flushCache="false">
+  	select pd.*,pv.provider_name,cg.category_name from products pd,providers pv,categorys cg 
+  	where pd.categoryID = cg.categoryID and pd.providerID = pv.providerID
+  	order by pd.productID 
+  </select>
+  <!-- 添加 -->
+  <insert id="addProduct" >
+  	insert into products (product_name,income_price,providerID,sales_price,quantity,categoryID,income_time)
+  	values (#{product_name},#{income_price},#{pv.providerID},#{sales_price},#{quantity},#{cg.categoryID},#{income_time})
+  </insert>
+  <!-- 修改 -->
+  <update id="updateProduct">
+  	update products 
+  	<set>
+  		<if test="product_name != null">product_name=#{product_name},</if>
+  		<if test="income_price > 0">income_price=#{income_price},</if>
+  		<if test="pv != null ">providerID=#{pv.providerID},</if>
+  		<if test="quantity > 0">quantity=#{quantity},</if>
+  		<if test="sales_price > 0">sales_price=#{sales_price},</if>
+  		<if test="cg != null ">categoryID=#{cg.categoryID},</if>
+  		<if test="income_time != null ">income_time=#{income_time}</if>
+  	</set>
+  	where productID = #{productID}
+  </update>
+  <!-- 删除 -->		
+  <delete id="deleteProduct" >
+  	delete from products where productID = #{productID} 
+  </delete>
+  <!-- 判断产品名是否存在 -->
+  <select id="queryByName" resultType="categorys">
+  	select * from products where category_name = #{cate_name}
+  </select>
+  
+  <!-- 通过产品名查询产品信息 -->
+  <select id="getPdByName" resultMap="queryAllMap">
+ 	 select * from products where product_name like #{product_name}
+  </select>
+   <!-- 通过产品名查询供应商信息 -->
+  <select id="getPvByName" resultMap="queryAllMap">
+  	 select pd.*,pv.provider_name
+	 from  products pd ,providers pv
+	 where pd.providerID=pv.providerID
+	 and pd.product_name= #{product_name}
+  </select>
+   <!-- 通过分类ID查询产品信息 -->
+   <select id="getPdByCgId" resultMap="queryAllMap">
+  	select * from products where categoryID = #{categoryID}
+   </select>
+ 
+</mapper>

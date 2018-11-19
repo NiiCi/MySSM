@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	<!-- 导入外部xml文件 -->
+	<import resource="classpath:spring-shiro.xml"/>
+	<!-- 使用外部属性文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<!-- 开启扫描 -->
+	 <context:component-scan base-package="com.nc.service,com.nc.aop,com.nc.entity">
+	 	<!--  <context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" /> -->
+	 </context:component-scan>
+	<!-- 开启AspectJ 注解支持 -->
+ 	<!-- <aop:aspectj-autoproxy/> -->
+	<!-- 配置c3p0连接池数据源 -->
+ 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" 
+ 		p:driverClass="${driver}"
+ 		p:jdbcUrl="${url}"
+ 		p:user="${user}"
+ 		p:password="${password}"
+ 		p:minPoolSize="${minPoolSize}"
+		p:maxPoolSize="${maxPoolSize}"
+		lazy-init="true"
+ 	>
+	</bean>
+	<!-- 开启Spring事务注解 -->
+ 	<tx:annotation-driven transaction-manager="transactionManager"/>
+ 	<!-- 配置事务管理器 -->
+ 	<bean id="transactionManager"  class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+ 	p:dataSource-ref="dataSource"
+ 	>	
+ 	</bean>
+	<!-- 配置sqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" 
+		p:dataSource-ref="dataSource"
+		p:configLocation="classpath:mybatis-config.xml"
+		p:mapperLocations="classpath:mapper/*Mapper.xml"
+		lazy-init="true"
+	>
+	</bean>
+	
+	<!-- 批量扫描Mapper接口 -->
+	<!-- <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"
+		p:basePackage="com.nc.dao"
+		p:sqlSessionFactoryBeanName="sqlSessionFactory"
+	>
+	</bean> -->
+
+	<!-- 批量扫描Mapper接口 -->
+  	<mybatis-spring:scan base-package="com.nc.dao"/>
+  	<!-- XML配置AspectJ切面 -->
+<!--   	<bean id="checkNumAspect" class="com.nc.aop.CheckAOP"></bean> -->
+<!--   	<aop:config> -->
+<!--   		<aop:pointcut expression="execution(* Cal.*(..))" id="testAspect"/> -->
+<!--   		<aop:aspect id="checknum" ref="checkNumAspect"> -->
+<!--   			<aop:before method="checkNum" pointcut-ref="testAspect"/> -->
+<!--   		</aop:aspect> -->
+<!--   	</aop:config> -->
+
+	<!-- 配置mapper接口实现 -->
+<!-- 	<bean id="adminDaoMapper" class="org.mybatis.spring.mapper.MapperFactoryBean" -->
+<!-- 		p:mapperInterface="com.nc.dao.AdminDao" -->
+<!-- 		p:sqlSessionFactory-ref="sqlSessionFactory" -->
+<!-- 		lazy-init="true" -->
+<!-- 	> -->
+<!-- 	</bean> -->
+	
+<!-- 	<bean id="categoryDaoMapper" class="org.mybatis.spring.mapper.MapperFactoryBean" -->
+<!-- 		p:mapperInterface="com.nc.dao.CategoryDao" -->
+<!-- 		p:sqlSessionFactory-ref="sqlSessionFactory" -->
+<!-- 		lazy-init="true" -->
+<!-- 	> -->
+<!-- 	</bean> -->
+
+		<!-- 注册前置通知 -->
+<!-- 		<bean id="beforeAdvice" class="com.nc.aop.AdviceBefore"></bean> -->
+		<!-- 注册异常通知 -->
+<!-- 		<bean id="throwAdvice"  class="com.nc.aop.AdviceThrow"></bean> -->
+		<!-- 注册前置通知代理生成器 -->
+<!-- 		<bean id="beforeAdviceProxy" class="org.springframework.aop.framework.ProxyFactoryBean" -->
+<!-- 			p:target-ref="cal" -->
+<!-- 			p:interfaces="com.nc.aop.Cal" -->
+<!-- 			p:interceptorNames="beforeAdvice" -->
+<!-- 		></bean> -->
+		<!-- 注册异常通知代理生成器 -->
+<!-- 		<bean id="throwAdviceProxy" class="org.springframework.aop.framework.ProxyFactoryBean" -->
+<!-- 			p:target-ref="cal" -->
+<!-- 			p:interfaces="com.nc.aop.Cal" -->
+<!-- 			p:interceptorNames="throwAdvice" -->
+<!-- 		></bean> -->
+</beans>

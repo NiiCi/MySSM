@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nc.dao.NavMapper">
+	<!-- 使用redis缓存 -->
+	<cache type="org.mybatis.caches.redis.RedisCache"></cache>
+  <select id="queryRolesByName" resultType="roles" flushCache="false">
+	select a.admin_id,a.admin_name,r.* 
+	from admin a , roles r , role_admin r_a
+	where a.admin_id = r_a.admin_id and r.roleid = r_a.roleid 
+	and a.admin_name = #{admin_name}
+  </select>
+  <select id="queryPersByRoleid" resultType="pers" flushCache="false">
+	select p.*
+	from admin a,roles r,role_admin ra,pers p,per_role pr
+	where a.admin_id = ra.admin_id
+	and r.roleid = ra.roleid
+	and p.perid = pr.perid
+	and r.roleid = pr.roleid
+	and isNav = 1
+	and r.roleid = #{roleid}
+	and a.admin_name = #{admin_name}
+  </select>
+  <select id="queryAllPers" resultType="pers">
+  		select p.*
+	from admin a,roles r,role_admin ra,pers p,per_role pr
+	where a.admin_id = ra.admin_id
+	and r.roleid = ra.roleid
+	and p.perid = pr.perid
+	and r.roleid = pr.roleid
+	and a.admin_name = #{admin_name}
+  </select>
+ 
+</mapper>

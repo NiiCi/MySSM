@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nc.dao.PerMapper">
+  <!-- 开启第三方缓存 -->
+  <!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache> -->
+  <!-- 使用redis缓存 -->
+	<cache type="org.mybatis.caches.redis.RedisCache"></cache>
+  <select id="queryPersAll" resultType="pers" flushCache="false">
+  	select * from pers
+  </select>
+  <select id="queryPersByRoleid" resultType="pers" flushCache="false">
+  	select p.* from roles r ,per_role pr , pers p
+		where r.roleid = pr.roleid
+		and p.perid = pr.perid
+		and r.roleid = #{roleid}
+  </select>	
+  <insert id="addPer">
+  	insert into pers (perDesc,url,isNav,perCode) 
+  	values(#{perDesc},#{url},#{isNav},#{perCode})
+  </insert>
+  <update id="updatePer">
+  	update pers 
+  	<set>
+  		<if test="perDesc != null">perDesc=#{perDesc},</if>
+  		<if test="url != null">url=#{url},</if>
+  		<if test="isNav != null">isNav=#{isNav},</if>
+  		<if test="perCode != null">perCode=#{perCode},</if>
+  	</set>
+  	where perid = #{perid}
+  </update>
+  <delete id="deletePer">
+  	delete from pers where perid = #{perid}
+  </delete>
+  <insert id="addRolePers">
+  	insert into per_role (roleid,perid) values 
+  	<foreach collection="perList" item="item" separator=",">
+  		(#{item.roleid},#{item.perid})
+  	</foreach>
+  </insert>
+	<delete id="deleteRolePers">
+		delete from per_role where roleid = #{roleid}
+	</delete>
+ 
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<!-- <properties resource="jdbc.properties"></properties> -->
+	<!-- 启用log4j 日志 -->
+	<settings>
+    	<setting name="logImpl" value="LOG4J"/>
+    </settings>
+    <!-- 类型别名 -->
+    <typeAliases>
+    	<package name="com.nc.entity"/>
+    </typeAliases>
+    
+    <!-- 分页合理化 -->
+    <plugins>
+    	<plugin interceptor="com.github.pagehelper.PageInterceptor">
+    		<property name="reasonable" value="true"/>
+    	</plugin>
+    </plugins>
+<!-- 	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${driver}" />
+				<property name="url" value="${url}" />
+				<property name="username" value="${user}" />
+				<property name="password" value="${password}" />
+			</dataSource>
+		</environment>
+	</environments> -->
+<!-- 	<mappers>
+		<mapper resource="mapper/AdminDaoMapper.xml"/>
+		<mapper resource="mapper/CategoryDaoMapper.xml"/>
+		<mapper resource="mapper/ProviderDaoMapper.xml"/>
+		<mapper resource="mapper/ProductDaoMapper.xml"/>
+		<mapper resource="mapper/EmployeeDaoMapper.xml"/>
+		<mapper resource="mapper/CustomerDaoMapper.xml"/>
+		<mapper resource="mapper/OrderDaoMapper.xml"/>
+	</mappers> -->
+	
+</configuration>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nc.dao.AdminMapper">
+  <!-- 开启第三方缓存 -->
+<!--   <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache> -->
+	<!-- 使用redis缓存 -->
+  <cache type="org.mybatis.caches.redis.RedisCache"></cache>
+  <select id="AdminLogin" resultType="admin" >
+  	select * from admin where admin_name = #{name, jdbcType=VARCHAR} and admin_password = #{password, jdbcType=VARCHAR}
+  </select>
+  
+  <select id="getCount" resultType="int">
+  	select count(*) from admin 
+  </select>
+  
+  <select id="queryAll" resultType="admin" flushCache="false">
+  	select * from admin order by admin_id 
+  </select>
+  
+  <select id="queryByPage" resultType="admin">
+  	select * from admin order by admin_id limit #{pageIndex},#{pageSize}
+  </select>
+  
+  <select id="queryAdminByName" resultType="admin">
+	select * from admin where admin_name = #{admin_name}
+  </select>
+  
+  <insert id="addAdmin">
+  	insert into admin (admin_name,admin_password,admin_date) values (#{admin_name},#{admin_password},#{admin_date})
+  </insert>
+  
+  <insert id="addAdminList" >
+	  	insert into admin (admin_name,admin_password,admin_date) values 
+	  	<foreach collection="adminList" item="item" separator=",">
+	  		(#{item.admin_name},#{item.admin_password},#{item.admin_date})
+	  	</foreach>
+<!-- 	 	<if test="adminid != 0"> -->
+<!-- 	  		insert into admin values -->
+<!-- 	  		<foreach collection="adminList" item="item" separator=","> -->
+<!-- 	  			(#{item.admin_id},#{item.admin_name},#{item.admin_password},#{item.admin_date}) -->
+<!-- 	  		</foreach> -->
+<!-- 	  	</if>  -->
+  
+  
+	</insert>
+  
+  <update id="updateAdmin">
+  	update admin set admin_name = #{admin_name},admin_password = #{admin_password},admin_date = #{admin_date} where admin_id = #{admin_id}
+  </update>
+  
+  <delete id="deleteAdmin" >
+  	delete from admin where admin_id = #{id}
+  </delete>
+  <select id="queryRolesByName" resultType="roles">
+	select a.admin_id,a.admin_name,r.* 
+	from admin a , roles r , role_admin r_a
+	where a.admin_id = r_a.admin_id and r.roleid = r_a.roleid and a.admin_name = #{admin_name}
+  </select>
+  <select id="queryAllPers" resultType="pers">
+  	select p.*
+		from admin a,roles r,role_admin ra,pers p,per_role pr
+		where a.admin_id = ra.admin_id
+		and r.roleid = ra.roleid
+		and p.perid = pr.perid
+		and r.roleid = pr.roleid
+		and a.admin_name = #{admin_name}
+  </select>
+
+ 
+</mapper>

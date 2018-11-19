@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+    <!-- 开启扫描 -->
+    <context:component-scan base-package="com.nc.realm"></context:component-scan>
+    <!-- 安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- 缓存管理器 -->
+        <property name="cacheManager"  ref="cacheManager"/>
+        
+        <!-- Single realm app.  If you have multiple realms, use the 'realms' property instead. -->
+        <!-- 安全数据域 -->
+        <property name="rememberMeManager.cookie.maxAge" value="60"></property>
+        <property name="realm" ref="jdbcRealm"/>
+    </bean>
+    
+    <!-- 缓存管理器 -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <!-- Set a net.sf.ehcache.CacheManager instance here if you already have one.  If not, a new one
+             will be creaed with a default config:
+             <property name="cacheManager" ref="ehCacheManager"/> -->
+        <property name="cacheManagerConfigFile" value="classpath:ehcache.xml"/>
+    </bean>
+    <!--  <bean id="jdbcRealm" class="org.apache.shiro.samples.spring.realm.SaltAwareJdbcRealm"> -->
+    <!-- jdbcRealm域 -->
+    <bean id="jdbcRealm" class="com.nc.realm.ShiroRealm">
+        <property name="name" value="jdbcRealm"/>
+<!--    		 <property name="dataSource" ref="dataSource"/> -->
+    	<!-- 密码捕获器 -->
+          <property name="credentialsMatcher">
+<!--               The 'bootstrapDataPopulator' Sha256 hashes the password -->
+<!--                   (using the username as the salt) then base64 encodes it: -->
+             <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+             	<!-- 加密算法 --> 
+                <property name="hashAlgorithmName" value="MD5"/>
+             	<!-- 加密次数  -->
+                <property name="hashIterations" value="1000"></property>
+               
+             </bean> 
+         </property> 
+    </bean>
+    
+	<!-- Shiro生命周期  -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor"/>
+          
+
+
+	<!-- shiroFilter 要在web.xml中配置shiroFilter过滤器 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/"/>
+        <property name="successUrl" value="/index"/>
+        <property name="unauthorizedUrl" value="/"/>
+        <!-- The 'filters' property is not necessary since any declared javax.servlet.Filter bean
+             defined will be automatically acquired and available via its beanName in chain
+             definitions, but you can perform overrides or parent/child consolidated configuration
+             here if you like: -->
+        <!-- <property name="filters">
+            <util:map>
+                <entry key="aName" value-ref="someFilterPojo"/>
+            </util:map>
+        </property> -->
+        <!-- anon 匿名访问,authc 需要认证,logout 注销 -->
+        <property name="filterChainDefinitions">
+            <value>
+                / = anon
+               	/userLogin = anon
+                /changeLanguage = anon
+                /logo.png = anon
+                /shiro.css = anon
+                /css/* = anon
+                /js/* = anon
+                /image/* = anon
+                /My97DatePicker/* = anon
+           		<!-- 退出登录 -->
+                /logout= logout
+                <!-- 记住我 -->
+                /* = user
+                
+                
+                # everything else requires authentication:
+                <!-- 权限验证 -->
+                /** = authc
+                
+            </value>
+        </property>
+    </bean>
+</beans>
